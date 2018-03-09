@@ -1,0 +1,44 @@
+# Produced by CVXGEN, 2018-02-26 09:21:10 -0500.
+# CVXGEN is Copyright (C) 2006-2017 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2017 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  m = 3
+  nd = 3
+  nx = 8
+  T = 18
+end
+
+parameters
+  A (nx, nx)
+  B (nx, m)
+  Bd (nx, nd)
+  Q_x (nx, nx) psd
+  P (nx, nx) psd
+  R_u (m, m) psd
+  R_delta (m, m) psd
+  x[0] (nx)
+  d (nd)
+  u_prev (m)
+  u_max (m)
+  u_min (m)
+  x_ss[t] (nx), t=0..T+1
+  u_ss[t] (m), t=0..T
+end
+
+variables
+  x[t] (nx), t = 1..T+1
+  u[t] (m) , t = 0..T
+end
+
+minimize
+  quad(x[0]-x_ss[0], Q_x) + quad(u[0]-u_ss[0], R_u) + quad(u[0]-u_prev, R_delta) + sum[t=1..T](quad(x[t]-x_ss[t], Q_x) + quad(u[t]-u_ss[t], R_u) + quad(u[t]-u[t-1], R_delta)) + quad(x[T+1]-x_ss[T+1], P)
+subject to
+  x[t+1] == A*x[t] + B*u[t] + Bd*d, t=0..T
+  u_min <= u[t] <= u_max, t=0..T
+end
